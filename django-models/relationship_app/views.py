@@ -3,8 +3,8 @@ from django.views.generic import DetailView
 from .models import Book, Author, Library, Librarian
 
 def storage(request):
- book =Book.objects.all()
- return render(request, 'list_books.html', {'book': book})
+ books =Book.objects.all()
+ return render(request, 'list_books.html', {'book': books})
 class viewss(DetailView):
   model = Book
   template_name = 'library_detail.html'
