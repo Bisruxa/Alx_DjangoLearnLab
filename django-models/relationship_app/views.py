@@ -4,7 +4,7 @@ from .models import Book, Author, Library, Librarian
 
 def storage(request):
  books =Book.objects.all()
- return render(request, 'list_books.html', {'book': books})
+ return render(request, 'relationship_app/list_books.html', {'book': books})
 class viewss(DetailView):
   model = Book
   template_name = 'library_detail.html'
