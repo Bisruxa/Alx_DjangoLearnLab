@@ -4,10 +4,10 @@ from .models import Book, Author, Librarian
 from .models import Library
 
 
-def storage(request):
+def list_books(request):
  books =Book.objects.all()
  return render(request, 'relationship_app/list_books.html', {'book': books})
-class viewss(DetailView):
+class LibraryDetailView(DetailView):
   model = Book
   template_name = 'relationship_app/library_detail.html'
   def get_contex_data(self, **kwargs):
