@@ -8,7 +8,7 @@ for book in books:
     print(book)
 
 
-librarians = Librarian.objects.all()  
+librarians = Librarian.objects.get(library="library_name")  
 
 
 for librarian in librarians:
