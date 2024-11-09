@@ -29,3 +29,68 @@ def admin_view(request):
         return HttpResponse("You are not authorized to view this page.")
     return render(request, 'admin_view.html')
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# views.py
+from django.shortcuts import render, redirect
+from .models import Book
+from .forms import BookForm  # Assuming you have a BookForm for handling the book data
+from django.contrib.auth.decorators import permission_required
+
+# View for adding a new book
+@permission_required('relationship_app.can_add_book', raise_exception=True)
+def add_book(request):
+    if request.method == 'POST':
+        form = BookForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('book_list')  # Redirect to a list of books after adding
+    else:
+        form = BookForm()
+    return render(request, 'add_book.html', {'form': form})
+# View for editing an existing book
+@permission_required('relationship_app.can_change_book', raise_exception=True)
+def edit_book(request, pk):
+    book = Book.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = BookForm(request.POST, instance=book)
+        if form.is_valid():
+            form.save()
+            return redirect('book_detail', pk=book.pk)  # Redirect to the book details page after editing
+    else:
+        form = BookForm(instance=book)
+    return render(request, 'edit_book.html', {'form': form})
+# View for deleting a book
+@permission_required('relationship_app.can_delete_book', raise_exception=True)
+def delete_book(request, pk):
+    book = Book.objects.get(pk=pk)
+    if request.method == 'POST':
+        book.delete()
+        return redirect('book_list')  # Redirect to the list of books after deleting
+    return render(request, 'delete_book.html', {'book': book})
