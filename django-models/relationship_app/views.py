@@ -16,9 +16,16 @@
 #     return context
 
 from django.shortcuts import render
+from django.http import HttpResponse
 from django.contrib.auth import login,logout
 from django.contrib.auth.forms import UserCreationForm
 def register(request):
   form = UserCreationForm()
   context = {'form':form}
   return render(request , 'relationship_app/register.html',context)
+def admin_view(request):
+    
+    if request.user.userprofile.role != 'Admin':
+        return HttpResponse("You are not authorized to view this page.")
+    return render(request, 'admin_view.html')
+
