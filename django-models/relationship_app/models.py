@@ -12,7 +12,7 @@ class Book(models.Model):
     return self.title
 class Library(models.Model):
   name = models.CharField(max_length = 100)
-  book = models.ManyToManyField(Book ,on_delete= models.CASCADE)
+  book = models.ManyToManyField(Book)
   def __str__(self):  
     return self.name
 class Librarian(models.Model):
