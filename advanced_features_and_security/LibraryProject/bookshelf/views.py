@@ -16,7 +16,7 @@ from django.views.decorators.csrf import csrf_protect
 @csrf_protect
 def my_view(request):
     pass
-from .forms import BookForm
+from .forms import ExampleForm
 
 def create_book(request):
     if request.method == 'POST':
