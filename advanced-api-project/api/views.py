@@ -22,15 +22,14 @@ from rest_framework.generics import ListAPIView
 from .models import Book
 from .serializers import BookSerializer
 from .filters import BookFilter
-from rest_framework.filters import SearchFilter, OrderingFilter
-
-class BookListView(ListAPIView):
+from rest_framework import filters
+class BookListView(generics.ListAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
     filterset_class = BookFilter
     search_fields = ['title', 'author__name']
-    filter_backends = (SearchFilter, OrderingFilter)
+    filter_backends =  [filters.OrderingFilter]
     ordering_fields = ['title', 'publication_year']  # Allow ordering by title or publication year
     ordering = ['title']  # Default ordering (can be adjusted)
 
