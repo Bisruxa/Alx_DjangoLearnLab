@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets
 from .models import Book,Author
 from .serializers import BookSerializer,AuthorSerializer
+from django_filters import rest_framework
 # class Bookviewset(viewsets.ModelViewSet):
 #   queryset = Book.objects.all()
 #   serializer_class = BookSerializer
@@ -16,11 +17,22 @@ from rest_framework.generics import (
     DestroyAPIView
 )
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated,AllowAny
+from rest_framework import generics
+from rest_framework.generics import ListAPIView
+from .models import Book
+from .serializers import BookSerializer
+from .filters import BookFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 
 class BookListView(ListAPIView):
-  queryset = Book.objects.all()
-  serializer_class = BookSerializer
-  permission_classes=[IsAuthenticatedOrReadOnly]
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    filterset_class = BookFilter
+    search_fields = ['title', 'author__name']
+    filter_backends = (SearchFilter, OrderingFilter)
+    ordering_fields = ['title', 'publication_year']  # Allow ordering by title or publication year
+    ordering = ['title']  # Default ordering (can be adjusted)
 
 class BookCreateView(CreateAPIView):
   queryset = Book.objects.all()
