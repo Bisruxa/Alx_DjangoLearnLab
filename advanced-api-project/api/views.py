@@ -32,6 +32,7 @@ class BookListView(generics.ListAPIView):
     filter_backends =  [filters.OrderingFilter]
     ordering_fields = ['title', 'publication_year']  # Allow ordering by title or publication year
     ordering = ['title']  # Default ordering (can be adjusted)
+    search_fields = ['title', "author"]
 
 class BookCreateView(CreateAPIView):
   queryset = Book.objects.all()
