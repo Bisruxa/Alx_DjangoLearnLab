@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm,AuthenticationForm
 from django.contrib.auth import login,logout
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from .forms import ProfileForm
+from .forms import ProfileForm,CommentForm
 from .models import Profile
 from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
@@ -12,6 +12,8 @@ from django.db import IntegrityError
 from .forms import PostForm
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
+from .models import Comment
+
 
 def register_view(request):
   if request.method == "POST":
@@ -74,22 +76,67 @@ class PostListView(ListView):
   model = Post
   template_name = 'blog/post_list.html'
   context_object_name = 'posts'
-class PostDetailView(DetailView):
-  model = Post
-  template_name = 'blog/post_detail.html'
-  context_object_name = 'post'  
 
+
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'blog/post_detail.html'
+    context_object_name = 'post'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = CommentForm()  # Create an empty form instance
+        context['comments'] = self.object.comments.all()  # Get all comments for the post
+        return context
+
+    def post(self, request, *args, **kwargs):
+        post = self.get_object()  # Correct the method name here
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            # Save the comment associated with the post and the logged-in user
+            comment = form.save(commit=False)
+            comment.post = post
+            comment.author = request.user
+            comment.save()
+            return redirect('post_detail', pk=post.pk)  # Redirect back to the post detail page after saving the comment
+
+        # If form is not valid, render the page again with the form errors
+        return self.get(request, *args, **kwargs)
+    
 class PostCreateView(LoginRequiredMixin,UserPassesTestMixin,CreateView):
   model = Post
   # fields = ['title', 'content'] using both fields and form class is not allowed
   form_class = PostForm
   success_url = reverse_lazy('post_list')
   login_url = '/login/'#redirects to login page if the user is not loged in
+  def test_func(self):
+    return True
 
   def form_valid(self, form):
     form.instance.author = self.request.user
     return super().form_valid(form)
+class CommentUpdateView(LoginRequiredMixin, UpdateView):
+    model = Comment
+    fields = ['content']
+    template_name = 'blog/comment_form.html'
+    
+    def get_queryset(self):
+        # Ensure the user can only edit their own comments
+        return self.model.objects.filter(author=self.request.user)
 
+    def form_valid(self, form):
+        # Save the form and redirect to the post detail page
+        form.save()
+        return redirect('post_detail', pk=self.object.post.pk)
+
+class CommentDeleteView(LoginRequiredMixin, DeleteView):
+    model = Comment
+    template_name = 'blog/comment_confirm_delete.html'
+    success_url = '/'  # Redirect to home or any other URL after successful deletion
+
+    def get_queryset(self):
+        # Ensure the user can only delete their own comments
+     return self.model.objects.filter(author=self.request.user)
 class PostUpdateView(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
   model = Post
   fields = ['title', 'content']

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Profile,Post
+from .models import Profile,Post,Comment
 
 class ProfileForm(forms.ModelForm):
     class Meta:
@@ -16,3 +16,7 @@ class PostForm(forms.ModelForm):
     #         post.author= self.instance.author
     #         post.save()
     #     return post
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['content']

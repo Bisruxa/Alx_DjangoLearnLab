@@ -10,4 +10,21 @@
     <p>   </p>
     <a href="{% url 'post_delete' post.pk %}">Delete</a> <!-- Delete link for post authors -->
   {% endif %}
+   <h3>Comments</h3>
+  {% for comment in comments %}
+    <div class="comment">
+      <p><strong>{{ comment.author.username }}</strong> said:</p>
+      <p>{{ comment.content }}</p>
+      <p><small>Posted on {{ comment.created_at }}</small></p>
+    </div>
+  {% empty %}
+    <p>No comments yet. Be the first to comment!</p>
+  {% endfor %}
+
+  <h3>Add a Comment</h3>
+  <form method="POST" action="{% url 'post_detail' post.pk %}">
+    {% csrf_token %}
+    {{ form.as_p }}  <!-- Render the form fields -->
+    <button type="submit">Post Comment</button>
+  </form>
 {% endblock %}
