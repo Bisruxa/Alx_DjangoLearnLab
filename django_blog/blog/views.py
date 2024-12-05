@@ -4,7 +4,7 @@ from django.contrib.auth import login,logout
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm,CommentForm
-from .models import Profile
+from .models import Profile,Tag
 from django.contrib import messages
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from .models import Post
@@ -13,6 +13,7 @@ from .forms import PostForm
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from .models import Comment
+from django.db.models import Q
 
 
 def register_view(request):
@@ -160,3 +161,19 @@ class PostDeleteView(DeleteView):
   model = Post
   template_name = 'blog/post_delete.html'
   success_url = reverse_lazy('post_list')
+def search(request):
+    query = request.GET.get('q', '')
+    posts = Post.objects.all()
+
+    if query:
+        posts = posts.filter(
+            Q(title__icontains=query) | 
+            Q(content__icontains=query) | 
+            Q(tags__name__icontains=query)
+        ).distinct()
+
+    return render(request, 'blog/search_results.html', {'posts': posts, 'query': query})
+def posts_by_tag(request, tag_name):
+    tag = get_object_or_404(Tag, name=tag_name)
+    posts = tag.posts.all()
+    return render(request, 'blog/tag_posts.html', {'posts': posts, 'tag': tag})
