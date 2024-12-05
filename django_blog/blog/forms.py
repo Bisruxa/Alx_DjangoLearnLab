@@ -4,7 +4,7 @@ from .models import Profile,Post
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['bio','post']
+        fields = ['bio']
 
 class PostForm(forms.ModelForm):
     class Meta:
