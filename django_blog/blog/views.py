@@ -11,7 +11,7 @@ from .models import Post
 from django.db import IntegrityError
 from .forms import PostForm
 from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 
 def register_view(request):
   if request.method == "POST":
@@ -79,7 +79,7 @@ class PostDetailView(DetailView):
   template_name = 'blog/post_detail.html'
   context_object_name = 'post'  
 
-class PostCreateView(LoginRequiredMixin,CreateView):
+class PostCreateView(LoginRequiredMixin,UserPassesTestMixin,CreateView):
   model = Post
   # fields = ['title', 'content'] using both fields and form class is not allowed
   form_class = PostForm
@@ -90,7 +90,7 @@ class PostCreateView(LoginRequiredMixin,CreateView):
     form.instance.author = self.request.user
     return super().form_valid(form)
 
-class PostUpdateView(LoginRequiredMixin,UpdateView):
+class PostUpdateView(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
   model = Post
   fields = ['title', 'content']
   template_name = 'blog/post_form.html'
