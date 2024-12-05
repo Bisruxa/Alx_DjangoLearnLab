@@ -1,6 +1,7 @@
 from django import forms
 from .models import Profile,Post,Comment,Tag
 from taggit.forms import TagWidget
+from django.forms import widgets
 
 class ProfileForm(forms.ModelForm):
     class Meta:
@@ -10,6 +11,9 @@ class ProfileForm(forms.ModelForm):
 class PostForm(forms.ModelForm):
     # tags = forms.CharField(max_length=255, required=False, help_text="Comma separated tags")
     tags = forms.CharField(widget=TagWidget()) 
+    title = forms.CharField(widget=widgets.TextInput(attrs={'placeholder': 'Post Title'}))
+    content = forms.CharField(widget=widgets.Textarea(attrs={'placeholder': 'Content'}))
+
     class Meta:
         model = Post
         fields = ['title', 'content','tags']
