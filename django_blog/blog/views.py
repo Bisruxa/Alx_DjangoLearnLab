@@ -175,3 +175,15 @@ def search(request):
         posts = Post.objects.all()  # If no query, return all posts
 
     return render(request, 'blog/search_results.html', {'posts': posts, 'query': query})
+class PostByTagListView(ListView):
+    model = Post
+    template_name = 'blog/post_list_by_tag.html'  # You can customize this template name
+    context_object_name = 'posts'
+
+    def get_queryset(self):
+        # Get the tag slug from the URL
+        tag_slug = self.kwargs['tag_slug']
+        # Get the tag object
+        tag = Tag.objects.get(slug=tag_slug)
+        # Filter posts by the tag
+        return Post.objects.filter(tags=tag)
