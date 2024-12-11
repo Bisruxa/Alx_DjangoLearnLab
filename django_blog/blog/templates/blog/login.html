@@ -12,10 +12,12 @@
 <body>
     {% block content %}
     {% comment %} <h2>Login</h2> {% endcomment %}
-    <form action="{% url 'login' %}" method="post">
+    <form action="{% url 'login' %}" method="post" class ="mt-5 text-center ">
         {% csrf_token %}
-        {{ form }}
-        <button>Submit</button>
+        <div class="form-group">
+        {{ form.as_p }}
+        </div>
+        <button type="submit" class="btn btn-secondary mt-5">Submit</button>
     </form>
     {% endblock %}
 </body>

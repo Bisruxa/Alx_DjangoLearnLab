@@ -73,36 +73,54 @@ def profile_view(request):
     # return render(request, 'profile.html', {'form': form})
     profile , created = Profile.objects.get_or_create(user=request.user)
     return render(request, 'blog/profile.html', {'profile': profile})
+#list makes query set to the database and returns products stored in the database
 class PostListView(ListView):
   model = Post
   template_name = 'blog/post_list.html'
   context_object_name = 'posts'
+ # ordering = [-id] #used to makethe current post appear at the beginning 
 
-
+#detail view make a query set to the database but return one product
 class PostDetailView(DetailView):
     model = Post
     template_name = 'blog/post_detail.html'
     context_object_name = 'post'
 
     def get_context_data(self, **kwargs):
+        # Call the parent class's get_context_data method to get the context
         context = super().get_context_data(**kwargs)
+        
+        # Add the comment form and comments to the context
         context['form'] = CommentForm()  # Create an empty form instance
         context['comments'] = self.object.comments.all()  # Get all comments for the post
+        
         return context
 
     def post(self, request, *args, **kwargs):
-        post = self.get_object()  # Correct the method name here
+        # Get the current post object
+        post = self.get_object()
+        
+        # Check if the user is authenticated before allowing the comment submission
+        if not request.user.is_authenticated:
+            messages.error(request, "You must be logged in to comment.")
+            return redirect('login')  # Redirect to the login page (adjust 'login' as needed)
+
         form = CommentForm(request.POST)
+        
         if form.is_valid():
             # Save the comment associated with the post and the logged-in user
             comment = form.save(commit=False)
             comment.post = post
             comment.author = request.user
             comment.save()
-            return redirect('post_detail', pk=post.pk)  # Redirect back to the post detail page after saving the comment
 
+            # Redirect back to the post detail page after saving the comment
+            return redirect('post_detail', pk=post.pk)
+        
         # If form is not valid, render the page again with the form errors
-        return self.get(request, *args, **kwargs)
+        context = self.get_context_data()  # Reuse the context data method
+        context['form'] = form  # Add the form with errors to the context
+        return self.render_to_response(context)
     
 class PostCreateView(LoginRequiredMixin,UserPassesTestMixin,CreateView):
   model = Post
@@ -142,6 +160,7 @@ class CommentUpdateView(LoginRequiredMixin, UpdateView):
         # Save the form and redirect to the post detail page
         form.save()
         return redirect('post_detail', pk=self.object.post.pk)
+    
 
 class CommentDeleteView(LoginRequiredMixin, DeleteView):
     model = Comment
@@ -154,9 +173,11 @@ class CommentDeleteView(LoginRequiredMixin, DeleteView):
 class PostUpdateView(LoginRequiredMixin,UserPassesTestMixin,UpdateView):
   model = Post
   fields = ['title', 'content']
-  template_name = 'blog/post_form.html'
+  template_name = 'blog/post_update.html'
   login_url = '/login/'#redirects to login page if the user is not loged in
   success_url = reverse_lazy('post_list')
+  def test_func(self):
+      return True
 class PostDeleteView(DeleteView):
   model = Post
   template_name = 'blog/post_delete.html'
@@ -187,3 +208,5 @@ class PostByTagListView(ListView):
         tag = Tag.objects.get(slug=tag_slug)
         # Filter posts by the tag
         return Post.objects.filter(tags=tag)
+# def home(request):
+#    return render(request,'blog/home.html')
