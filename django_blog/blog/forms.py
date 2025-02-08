@@ -35,15 +35,16 @@ class PostForm(forms.ModelForm):
             tag, created = Tag.objects.get_or_create(name=tag_name)
             post.tags.add(tag)
      return super().form_valid(form)   
-    def clean_tags(self):
-        tag_names = self.cleaned_data['tags']
-        return tag_names
     def save(self, commit=True):
         post = super().save(commit=True)
-        for tag_name in self.clean_tags():
-            tag, created = Tag.objects.get_or_create(name=tag_name)
+        tags = self.cleaned_data['tags']
+        for tag in tags:
             post.tags.add(tag)
         return post
+    def clean_tags(self):
+        tags = self.cleaned_data['tags'].split(',')
+        return [tag.strip() for tag in tags if tag.strip()]
+   
 class CommentForm(forms.ModelForm):
 
     content = forms.CharField(widget=widgets.Textarea(attrs={'class': 'form-control form-control-sm ','placeholder': 'Content', 'style': 'font-size: 12px; padding: 16px; height: 80px;'  }))
