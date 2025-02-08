@@ -3,21 +3,19 @@ from .models import Profile,Post,Comment,Tag
 from taggit.forms import TagWidget
 from django.forms import widgets
 from django.contrib.auth.models import User
-
+from .models import ProfilePicture
 # can be used to add styling to our forms
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['bio']
-    def create_post(request):
-        # ... other code ...
-        post = form.save(commit=False)
-        post.author = request.user
-        post.save()
-        profile = request.user.profile
-        profile.posts.add(post)
-        return redirect('post_list')
+   
 
+
+class ProfilePictureForm(forms.ModelForm):
+    class Meta:
+        model = ProfilePicture
+        fields = ('image',)
 class PostForm(forms.ModelForm):
     tags = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
     title = forms.CharField(widget=widgets.TextInput(attrs={'class': 'form-control', 'placeholder': 'Title'}))

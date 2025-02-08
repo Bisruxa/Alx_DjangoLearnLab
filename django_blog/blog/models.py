@@ -24,8 +24,10 @@ class Profile(models.Model):
   location = models.CharField(max_length=100,blank =True)
   posts = models.ManyToManyField(Post, related_name= 'profile',blank =True)
   def __str__(self):
-
     return self.user.username
+class ProfilePicture(models.Model):
+   image = models.ImageField(upload_to='profile_pictures')
+   user = models.OneToOneField(User, on_delete=models.CASCADE)
 class Comment(models.Model):
   post = models.ForeignKey(Post ,related_name=
   'comments', on_delete=models.CASCADE)

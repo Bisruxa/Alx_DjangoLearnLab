@@ -14,6 +14,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from .models import Comment
 from django.db.models import Q
+from .forms import ProfilePictureForm
 
 
 def register_view(request):
@@ -67,6 +68,18 @@ class PostListView(ListView):
  # ordering = [-id] #used to makethe current post appear at the beginning 
 
 #detail view make a query set to the database but return one product
+@login_required
+def select_profile_picture(request):
+    if request.method == 'POST':
+        form = ProfilePictureForm(request.POST, request.FILES)
+        if form.is_valid():
+            profile_picture = form.save(commit=False)
+            profile_picture.user = request.user
+            profile_picture.save()
+            return redirect('profile')
+    else:
+        form = ProfilePictureForm()
+    return render(request, 'select_profile_picture.html', {'form': form})
 class PostDetailView(DetailView):
     model = Post
     template_name = 'blog/post_detail.html'
