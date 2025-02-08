@@ -9,21 +9,27 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['bio']
+    def create_post(request):
+        # ... other code ...
+        post = form.save(commit=False)
+        post.author = request.user
+        post.save()
+        profile = request.user.profile
+        profile.posts.add(post)
+        return redirect('post_list')
 
 class PostForm(forms.ModelForm):
     tags = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control'}))
     title = forms.CharField(widget=widgets.TextInput(attrs={'class': 'form-control', 'placeholder': 'Title'}))
-    author = forms.ModelChoiceField(queryset=User.objects.all(),widget=widgets.Select(attrs={'class': 'form-select', 'placeholder': 'author'}))
-
-    
     content = forms.CharField(widget=widgets.Textarea(attrs={'class': 'form-control','placeholder': 'Content'}))
     tags = forms.CharField(widget=widgets.TextInput(attrs={'class': 'form-control'}))
 
-    
-
     class Meta:
         model = Post
-        fields = ['title','author', 'content','tags']
+        fields = ['title', 'content','tags']
+    def __init__(self, *args, request=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.request = request
     def form_valid(self, form):
      post = form.save(commit=False)
      post.author = self.request.user
@@ -35,11 +41,12 @@ class PostForm(forms.ModelForm):
             tag, created = Tag.objects.get_or_create(name=tag_name)
             post.tags.add(tag)
      return super().form_valid(form)   
-    def save(self, commit=True):
-        post = super().save(commit=True)
-        tags = self.cleaned_data['tags']
-        for tag in tags:
-            post.tags.add(tag)
+    def save(self, commit=True, request=None):
+        post = super().save(commit=False)
+        if request:
+            post.author = request.user  # set author to current user
+        if commit:
+            post.save()
         return post
     def clean_tags(self):
         tags = self.cleaned_data['tags'].split(',')

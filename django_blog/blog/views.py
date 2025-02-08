@@ -56,24 +56,10 @@ def logout_view(request):
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .forms import ProfileForm
-
 @login_required
 def profile_view(request):
-    # Retrieve the user's profile or create one if it doesn't exist
-    # profile = Profile.objects.get_or_create(user=request.user)
-
-    # if request.method == 'POST':
-    #     form = ProfileForm(request.POST, instance=profile)
-    #     if form.is_valid():
-    #         form.save()
-    #         return redirect('profile')  # Redirect to the profile page after saving
-    # else:
-    #     form = ProfileForm(instance=profile)
-
-    # return render(request, 'profile.html', {'form': form})
-    profile , created = Profile.objects.get_or_create(user=request.user)
-    return render(request, 'blog/profile.html', {'profile': profile})
-#list makes query set to the database and returns products stored in the database
+    posts = Post.objects.filter(author=request.user)
+    return render(request, 'blog/profile.html', {'posts': posts})
 class PostListView(ListView):
   model = Post
   template_name = 'blog/post_list.html'
